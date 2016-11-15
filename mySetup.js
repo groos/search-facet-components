@@ -1,0 +1,1 @@
+var _super = Coveo.Component;
