@@ -5,6 +5,7 @@ function CheckboxListFacet(element, options, bindings){
 
     this.$element = Coveo.$(element);
     this.wrapperClass = '.list-checkbox-wrapper';
+    this.operator = "==";
 };
 
 CheckboxListFacet.ID = "CheckboxListFacet";
@@ -13,16 +14,14 @@ CheckboxListFacet.options = {
 };
 
 CheckboxListFacet.prototype.buildComponent = function(groupByResults){
-    var self = this;
-
     this.$element.find(this.wrapperClass).unbind().remove();
 
     var groupByMatch = groupByResults.find(function(e){
-        return '@' + e.Field === self.options.field;
-    }, self);
+        return '@' + e.Field === this.options.field;
+    }, this);
 
     if (groupByMatch){
-        var queryState = self.queryStateModel.get(self.stateName);
+        var queryState = this.queryStateModel.get(this.stateName);
 
         groupByMatch.values.forEach(function(element){
             var name = element.Value;
@@ -35,16 +34,18 @@ CheckboxListFacet.prototype.buildComponent = function(groupByResults){
                 checkboxWrapper.find('#list-checkbox-' + name).prop('checked', true);
             }            
 
-            checkboxWrapper.appendTo(self.$element);
-        }, self);
+            checkboxWrapper.appendTo(this.$element);
+        }, this);
     }
 
-    this.$element.find('.list-checkbox').click(function(e){
-        // update the query state
-        var active = this.checked;
-        self.queryStateChanged(e.target.value, active);
-        self.queryController.deferExecuteQuery();
-    });
+    this.$element.find('.list-checkbox').click(this.handleClick.bind(this));
+};
+
+CheckboxListFacet.prototype.handleClick = function(e){
+    // update the query state
+    var active = e.target.checked;
+    this.queryStateChanged(e.target.value, active);
+    this.queryController.deferExecuteQuery();
 };
 
 CheckboxListFacet.prototype.queryStateChanged = function(field, active){

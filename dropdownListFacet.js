@@ -9,6 +9,7 @@ function DropdownListFacet(element, options, bindings){
     this.expanded = false;
     this.searching = false;
     this.wrapperClass = '.dropdown-list-wrapper';
+    this.operator = "==";
 };
 
 DropdownListFacet.ID = "DropdownListFacet";

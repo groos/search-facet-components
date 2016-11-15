@@ -4,6 +4,7 @@ function RadioButtonFacet(element, options, bindings){
     this.options = Coveo.ComponentOptions.initComponentOptions(element, RadioButtonFacet, options);
     this.wrapperClass = '.radio-button-wrapper';
     this.$element = Coveo.$(element);
+    this.operator = "==";
 };
 
 RadioButtonFacet.ID = "RadioButtonFacet";

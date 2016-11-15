@@ -54,8 +54,12 @@ FacetBase.prototype.buildExpression = function(){
     }
     
     var builder  = new Coveo.ExpressionBuilder();
-    builder.addFieldExpression(this.options.field, '==', stateArray);
-
+    if (this.operator){
+        builder.addFieldExpression(this.options.field, this.operator, stateArray);
+    } else {
+        builder.add(this.options.field);
+    }
+    
     return builder.build();
 };
 
