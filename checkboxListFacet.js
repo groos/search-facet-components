@@ -15,7 +15,7 @@ CheckboxListFacet.options = {
 
 CheckboxListFacet.prototype.buildComponent = function(groupByResults){
     this.$element.find(this.wrapperClass).unbind().remove();
-    
+
     var queryState = this.queryStateModel.get(this.stateName);
 
     groupByResults.forEach(function(element){
@@ -48,10 +48,8 @@ CheckboxListFacet.prototype.queryStateChanged = function(field, active){
     var newQueryValues = [];
     
     // add any other existing fields to query
-    oldQueryValues.forEach(function(oldFieldValue){
-        if (oldFieldValue.toLowerCase() !== field.toLowerCase()){
-            newQueryValues.push(oldFieldValue);
-        }
+    newQueryValues = oldQueryValues.filter(function(oldFieldValue){
+        return oldFieldValue.toLowerCase() !== field.toLowerCase();
     });
 
     // add or don't add this field

@@ -31,8 +31,6 @@ ClearAllFilters.prototype.handleQuerySuccess = function(e, data){
 };
 
 ClearAllFilters.prototype.handleClearFiltersClick = function(){
-
-    // clear dem filters
     this.queryStateModel.reset();
     this.queryController.deferExecuteQuery();
 };
