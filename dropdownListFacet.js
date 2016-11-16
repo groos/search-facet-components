@@ -21,15 +21,20 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
     var self = this;
     this.activeFilters = 0;
 
-    if (!userSearched){
-        this.groupByResults = groupByResults;
-    }
-
-    // unbind events and remove old DropdownListFacet
     this.$element.find(this.wrapperClass).unbind().remove();
 
-    
+    this.buildListWrappers();
+    this.buildDropdownListElements(groupByResults);
+    this.buildActiveFilters();
 
+    if (userSearched){
+        this.$element.find('.dropdown-list-text-input').focus();
+    } else {
+        this.groupByResults = groupByResults;
+    }
+};
+
+DropdownListFacet.prototype.buildListWrappers = function(){
     // Create the dropdown
     var listWrapper = Coveo.$('<div />', {"class" : "dropdown-list-wrapper", "css" : {"border" : "thin solid black"}});
 
@@ -52,15 +57,21 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
     searchInput.keyup(this.handleSearchInput.bind(this));
     searchInput.appendTo(dropdownWrapper);
 
-    // foreach groupby value add an entry to the dropdown
+    listWrapper.appendTo(this.$element);
+
+    Coveo.$('.dropdown-list-label').click(this.handleLabelClick.bind(this));
+};
+
+DropdownListFacet.prototype.buildDropdownListElements = function(groupByResults){
+    var dropdownWrapper = Coveo.$(this.$element).find('.dropdown-list-items');
     var queryState = this.queryStateModel.get(this.stateName);
 
     groupByResults.forEach(function(element){
         var name = element.Value;
         var listItem = Coveo.$('<div />', {"id" : "dropdown-list-item-" + name,
-                                        "class" : "dropdown-list-item",
-                                        "value" : name,
-                                        "css" : {}});
+                                            "class" : "dropdown-list-item",
+                                            "value" : name,
+                                            "css" : {}});
 
         var listItemCheckbox = Coveo.$('<input />', {"id" : "dropdown-list-item-checkbox-" + name,
                                                         "class" : "dropdown-list-item-checkbox",
@@ -86,9 +97,13 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
         listItemCount.appendTo(listItem);
         listItem.appendTo(dropdownWrapper);
     }, this);
-    
 
-    // active filters label
+    Coveo.$('.dropdown-list-item-checkbox').click(this.handleCheckboxClick.bind(this));
+};
+
+DropdownListFacet.prototype.buildActiveFilters = function(){
+    var listLabelDiv = Coveo.$(this.$element).find('.dropdown-list-label');
+
     var activeFiltersText = this.activeFilters ? this.activeFilters : "all";
     Coveo.$('<span />', {"class" : "dropdown-filter-count-label", 
                         "text": "(" + activeFiltersText + ")",
@@ -102,18 +117,6 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
         clearFilters.click(this.handleClearFiltersClick.bind(this));
         clearFilters.appendTo(listLabelDiv);
     }
-
-    // append the dropdown to self.$element
-    listWrapper.appendTo(this.$element);
-
-    // if searching, put focus in the text box
-    if (userSearched){
-        this.$element.find('.dropdown-list-text-input').focus();
-    }
-
-    // add click events to each dropdown item
-    Coveo.$('.dropdown-list-label').click(this.handleLabelClick.bind(this));
-    Coveo.$('.dropdown-list-item-checkbox').click(this.handleCheckboxClick.bind(this));
 };
 
 DropdownListFacet.prototype.handleClearFiltersClick = function(e){
