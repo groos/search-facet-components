@@ -7,7 +7,9 @@ function DropdownListFacet(element, options, bindings){
 
     this.currentSearch = "";
     this.expanded = false;
-    this.wrapperClass = '.dropdown-list-wrapper';
+    this.outerWrapperClass = '.dropdown-list-wrapper';
+    this.listItemsWrapperClass = '.dropdown-list-items';
+    this.listLabelClass = '.dropdown-list-label';
     this.operator = "==";
     this.activeFilters = 0;
 };
@@ -21,17 +23,36 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
     var self = this;
     this.activeFilters = 0;
 
-    this.$element.find(this.wrapperClass).unbind().remove();
+    this.$element.find(this.outerWrapperClass).unbind().remove();
 
     this.buildListWrappers();
     this.buildDropdownListElements(groupByResults);
-    this.buildActiveFilters();
+    this.buildActiveFiltersFeatures();
 
     if (userSearched){
         this.$element.find('.dropdown-list-text-input').focus();
     } else {
         this.groupByResults = groupByResults;
     }
+};
+
+DropdownListFacet.prototype.queryStateChanged = function(field, active){
+    var oldQueryValues = this.queryStateModel.get(this.stateName);
+    var newQueryValues = [];
+    
+    // add any other existing fields to query
+    oldQueryValues.forEach(function(oldFieldValue){
+        if (oldFieldValue.toLowerCase() !== field.toLowerCase()){
+            newQueryValues.push(oldFieldValue);
+        }
+    });
+
+    // add or don't add this field
+    if (active){
+        newQueryValues.push(field);
+    }
+
+    this.queryStateModel.set(this.stateName, newQueryValues);
 };
 
 DropdownListFacet.prototype.buildListWrappers = function(){
@@ -63,7 +84,7 @@ DropdownListFacet.prototype.buildListWrappers = function(){
 };
 
 DropdownListFacet.prototype.buildDropdownListElements = function(groupByResults){
-    var dropdownWrapper = Coveo.$(this.$element).find('.dropdown-list-items');
+    var dropdownWrapper = Coveo.$(this.$element).find(this.listItemsWrapperClass);
     var queryState = this.queryStateModel.get(this.stateName);
 
     groupByResults.forEach(function(element){
@@ -101,8 +122,8 @@ DropdownListFacet.prototype.buildDropdownListElements = function(groupByResults)
     Coveo.$('.dropdown-list-item-checkbox').click(this.handleCheckboxClick.bind(this));
 };
 
-DropdownListFacet.prototype.buildActiveFilters = function(){
-    var listLabelDiv = Coveo.$(this.$element).find('.dropdown-list-label');
+DropdownListFacet.prototype.buildActiveFiltersFeatures = function(){
+    var listLabelDiv = Coveo.$(this.$element).find(this.listLabelClass);
 
     var activeFiltersText = this.activeFilters ? this.activeFilters : "all";
     Coveo.$('<span />', {"class" : "dropdown-filter-count-label", 
@@ -117,6 +138,27 @@ DropdownListFacet.prototype.buildActiveFilters = function(){
         clearFilters.click(this.handleClearFiltersClick.bind(this));
         clearFilters.appendTo(listLabelDiv);
     }
+};
+
+DropdownListFacet.prototype.clearFilters = function(){
+    this.queryStateModel.set(this.stateName, []);
+    this.queryController.deferExecuteQuery();
+};
+
+DropdownListFacet.prototype.resetSearch = function(){
+    this.currentSearch = "";
+    this.expanded = false;
+};
+
+DropdownListFacet.prototype.handleSearchInput = function(e){
+    var matches = [];
+    this.currentSearch = e.target.value;
+
+    matches = this.groupByResults.filter(function(element){
+        return element.Value.toUpperCase().indexOf(e.target.value.toUpperCase()) >= 0;
+    })
+
+    this.buildComponent(matches, true);
 };
 
 DropdownListFacet.prototype.handleClearFiltersClick = function(e){
@@ -139,46 +181,6 @@ DropdownListFacet.prototype.handleCheckboxClick = function(e){
     var active = e.target.checked;
     this.queryStateChanged(e.target.value, active);
     this.queryController.deferExecuteQuery();
-};
-
-DropdownListFacet.prototype.queryStateChanged = function(field, active){
-    var oldQueryValues = this.queryStateModel.get(this.stateName);
-    var newQueryValues = [];
-    
-    // add any other existing fields to query
-    oldQueryValues.forEach(function(oldFieldValue){
-        if (oldFieldValue.toLowerCase() !== field.toLowerCase()){
-            newQueryValues.push(oldFieldValue);
-        }
-    });
-
-    // add or don't add this field
-    if (active){
-        newQueryValues.push(field);
-    }
-
-    this.queryStateModel.set(this.stateName, newQueryValues);
-};
-
-DropdownListFacet.prototype.handleSearchInput = function(e){
-    var matches = [];
-    this.currentSearch = e.target.value;
-
-    matches = this.groupByResults.filter(function(element){
-        return element.Value.toUpperCase().indexOf(e.target.value.toUpperCase()) >= 0;
-    })
-
-    this.buildComponent(matches, true);
-};
-
-DropdownListFacet.prototype.clearFilters = function(){
-    this.queryStateModel.set(this.stateName, []);
-    this.queryController.deferExecuteQuery();
-};
-
-DropdownListFacet.prototype.resetSearch = function(){
-    this.currentSearch = "";
-    this.expanded = false;
 };
 
 Coveo.CoveoJQuery.registerAutoCreateComponent(DropdownListFacet);
