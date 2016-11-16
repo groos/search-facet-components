@@ -84,7 +84,7 @@ DropdownListFacet.prototype.buildListWrappers = function(){
 };
 
 DropdownListFacet.prototype.buildDropdownListElements = function(groupByResults){
-    var dropdownWrapper = Coveo.$(this.$element).find(this.listItemsWrapperClass);
+    var dropdownWrapper = this.$element.find(this.listItemsWrapperClass);
     var queryState = this.queryStateModel.get(this.stateName);
 
     groupByResults.forEach(function(element){
@@ -123,7 +123,7 @@ DropdownListFacet.prototype.buildDropdownListElements = function(groupByResults)
 };
 
 DropdownListFacet.prototype.buildActiveFiltersFeatures = function(){
-    var listLabelDiv = Coveo.$(this.$element).find(this.listLabelClass);
+    var listLabelDiv = this.$element.find(this.listLabelClass);
 
     var activeFiltersText = this.activeFilters ? this.activeFilters : "all";
     Coveo.$('<span />', {"class" : "dropdown-filter-count-label", 

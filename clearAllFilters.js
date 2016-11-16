@@ -6,7 +6,8 @@ function ClearAllFilters(element, options, bindings){
     this.$element = Coveo.$(element);
     this.wrapperClass = 'clear-all-filters';
 
-    this.bind.onRoot(Coveo.QueryEvents.deferredQuerySuccess, this.handleQuerySuccess);
+    //this.bind.onRoot(Coveo.QueryEvents.deferredQuerySuccess, this.handleQuerySuccess);
+    this.bind.onRoot(Coveo.QueryEvents.doneBuildingQuery, this.handleDoneBuildingQuery);
 };
 
 ClearAllFilters.ID = "ClearAllFilters";
@@ -14,7 +15,7 @@ ClearAllFilters.options = {
     title: Coveo.ComponentOptions.buildStringOption()
 }
 
-ClearAllFilters.prototype.handleQuerySuccess = function(e, data){
+ClearAllFilters.prototype.handleDoneBuildingQuery = function(e, data){
     this.$element.find("." + this.wrapperClass).unbind().remove();
 
     var wrapper = Coveo.$('<div />', {"class" : this.wrapperClass, "css" : {"width" : "150px"}})
@@ -23,6 +24,10 @@ ClearAllFilters.prototype.handleQuerySuccess = function(e, data){
     wrapper.click(this.handleClearFiltersClick.bind(this));
 
     wrapper.appendTo(this.$element);
+};
+
+ClearAllFilters.prototype.handleQuerySuccess = function(e, data){
+
 };
 
 ClearAllFilters.prototype.handleClearFiltersClick = function(){
