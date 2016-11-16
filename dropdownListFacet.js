@@ -20,7 +20,6 @@ DropdownListFacet.options = {
 };
 
 DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearched){
-    var self = this;
     this.activeFilters = 0;
 
     this.$element.find(this.outerWrapperClass).unbind().remove();
@@ -29,6 +28,7 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
     this.buildDropdownListElements(groupByResults);
     this.buildActiveFiltersFeatures();
 
+    // If rebuilding from a user search, don't reset groupByResults and place cursor back in input
     if (userSearched){
         this.$element.find('.dropdown-list-text-input').focus();
     } else {
@@ -141,6 +141,7 @@ DropdownListFacet.prototype.buildActiveFiltersFeatures = function(){
 };
 
 DropdownListFacet.prototype.clearFilters = function(){
+    this.resetSearch();
     this.queryStateModel.set(this.stateName, []);
     this.queryController.deferExecuteQuery();
 };
