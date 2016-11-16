@@ -89,5 +89,9 @@ FacetBase.prototype.handleDoneBuildingQuery = function(e, args){
 };
 
 FacetBase.prototype.handleQuerySuccess = function(e, data){
-    this.buildComponent(data.results.groupByResults);
+    var groupByMatch = data.results.groupByResults.find(function(e){
+        return '@' + e.Field === this.options.field;
+    }, this);
+    
+    this.buildComponent(groupByMatch.values);
 };

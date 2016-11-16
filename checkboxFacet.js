@@ -12,18 +12,11 @@ CheckboxFacet.options = {
 };
 
 CheckboxFacet.prototype.buildComponent = function(groupByResults){
-    var self = this;
-
     // unbind events and remove old checkbox
     this.$element.find('.checkbox-facet').unbind().remove();
 
-    // get the groupby field for this component
-    var groupByMatch = groupByResults.find(function(e){
-        return '@' + e.Field === self.options.field;
-    }, self);
-
     // if there are any values in the groupby result, create the checkbox
-    if (groupByMatch && groupByMatch.values.length){
+    if (groupByResults.length){
         var checkbox = Coveo.$('<input />', {"class" : "checkbox-facet", "type" : "checkbox", "value" : "true"});
 
         // check the box if needed
@@ -31,14 +24,15 @@ CheckboxFacet.prototype.buildComponent = function(groupByResults){
             checkbox.prop('checked', true);
         }
 
-        checkbox.click(function(e){
-            var active = this.checked;
-            self.queryStateChanged(e.target.value, active);
-            self.queryController.deferExecuteQuery();
-        });
-
-        checkbox.appendTo(self.$element);
+        checkbox.click(this.handleClick.bind(this));
+        checkbox.appendTo(this.$element);
     }
+};
+
+CheckboxFacet.prototype.handleClick = function(e){
+    var active = e.target.checked;
+    this.queryStateChanged(e.target.value, active);
+    this.queryController.deferExecuteQuery();
 };
 
 CheckboxFacet.prototype.queryStateChanged = function(field, active){

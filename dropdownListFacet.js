@@ -7,7 +7,6 @@ function DropdownListFacet(element, options, bindings){
 
     this.currentSearch = "";
     this.expanded = false;
-    this.searching = false;
     this.wrapperClass = '.dropdown-list-wrapper';
     this.operator = "==";
 };
@@ -17,8 +16,12 @@ DropdownListFacet.options = {
     title: Coveo.ComponentOptions.buildStringOption()
 };
 
-DropdownListFacet.prototype.buildComponent = function(groupByResults){
+DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearched){
     var self = this;
+
+    if (!userSearched){
+        this.groupByResults = groupByResults;
+    }
 
     // unbind events and remove old DropdownListFacet
     this.$element.find(this.wrapperClass).unbind().remove();
@@ -44,57 +47,44 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults){
 
     // put any current search text into the box
     searchInput.val(this.currentSearch);
-    
-    searchInput.keyup(function(e){
-        // add the current text value to the querystatemodel and run the search
-        self.searching = true;
-        self.handleSearchInput(e.target.value);
-    });
-
+    searchInput.keyup(this.handleSearchInput.bind(this));
     searchInput.appendTo(dropdownWrapper);
 
     // foreach groupby value add an entry to the dropdown
-    var queryState = self.queryStateModel.get(this.stateName);
+    var queryState = this.queryStateModel.get(this.stateName);
 
-    var groupByMatch = groupByResults.find(function(e){
-        return '@' + e.Field === self.options.field;
-    }, self);
+    groupByResults.forEach(function(element){
+        var name = element.Value;
+        var listItem = Coveo.$('<div />', {"id" : "dropdown-list-item-" + name,
+                                        "class" : "dropdown-list-item",
+                                        "value" : name,
+                                        "css" : {}});
 
-    if (groupByMatch){
-        self.groupByResults = groupByResults;
+        var listItemCheckbox = Coveo.$('<input />', {"id" : "dropdown-list-item-checkbox-" + name,
+                                                        "class" : "dropdown-list-item-checkbox",
+                                                        "type" : "checkbox",
+                                                        "value" : name});
 
-        groupByMatch.values.forEach(function(element){
-            var name = element.Value;
-            var listItem = Coveo.$('<div />', {"id" : "dropdown-list-item-" + name,
-                                            "class" : "dropdown-list-item",
-                                            "value" : name,
-                                            "css" : {}});
+        if (queryState.indexOf(name) >= 0){
+            listItemCheckbox.prop('checked', true);
+            activeFilters++;
+        }
 
-            var listItemCheckbox = Coveo.$('<input />', {"id" : "dropdown-list-item-checkbox-" + name,
-                                                            "class" : "dropdown-list-item-checkbox",
-                                                            "type" : "checkbox",
-                                                            "value" : name});
+        var listItemLabel = Coveo.$('<span />', {"class": "dropdown-list-item-label", 
+                                                "text" : name, 
+                                                "css": {"padding-left":"5px"}});
 
-            if (queryState.indexOf(name) >= 0){
-                listItemCheckbox.prop('checked', true);
-                activeFilters++;
-            }
+        var count = element.score ? '(' + element.numberOfResults + ')': '+' + element.numberOfResults;
+        var listItemCount = Coveo.$('<span />', {"class" : "dropdown-list-item-count",
+                                                "text" : count,
+                                                "css" : {"padding-left":"5px"}});
 
-            var listItemLabel = Coveo.$('<span />', {"class": "dropdown-list-item-label", 
-                                                    "text" : name, 
-                                                    "css": {"padding-left":"5px"}});
-
-            var count = element.score ? '(' + element.numberOfResults + ')': '+' + element.numberOfResults;
-            var listItemCount = Coveo.$('<span />', {"class" : "dropdown-list-item-count",
-                                                    "text" : count,
-                                                    "css" : {"padding-left":"5px"}});
-
-            listItemCheckbox.appendTo(listItem);
-            listItemLabel.appendTo(listItem);
-            listItemCount.appendTo(listItem);
-            listItem.appendTo(dropdownWrapper);
-        });
-    }
+        listItemCheckbox.appendTo(listItem);
+        listItemLabel.appendTo(listItem);
+        listItemCount.appendTo(listItem);
+        listItem.appendTo(dropdownWrapper);
+    });
+    
 
     // active filters label
     activeFilters = activeFilters ? activeFilters : "all";
@@ -107,39 +97,43 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults){
         var clearFilters = Coveo.$('<span />', {"text" : "X", "css" : {"margin-left" : "10px", "background-color" : "red", "cursor" : "default"}});
 
         // bind click event
-        clearFilters.click(function(e){
-            self.clearFilters();
-            return false;
-        });
-
+        clearFilters.click(this.handleClearFiltersClick.bind(this));
         clearFilters.appendTo(listLabelDiv);
     }
 
     // append the dropdown to self.$element
-    listWrapper.appendTo(self.$element);
+    listWrapper.appendTo(this.$element);
 
     // if searching, put focus in the text box
-    if (this.searching){
-        self.$element.find('.dropdown-list-text-input').focus();
+    if (userSearched){
+        this.$element.find('.dropdown-list-text-input').focus();
     }
 
     // add click events to each dropdown item
-    Coveo.$('.dropdown-list-label').click(function(e){
-        if (Coveo.$('.dropdown-list-items').css('display') == 'block'){
-            Coveo.$('.dropdown-list-items').css("display", "none");
-            self.expanded = false;
-        } else {
-            Coveo.$('.dropdown-list-items').css("display", "block");
-            self.expanded = true;
-        }
-    });
+    Coveo.$('.dropdown-list-label').click(this.handleLabelClick.bind(this));
+    Coveo.$('.dropdown-list-item-checkbox').click(this.handleCheckboxClick.bind(this));
+};
 
-    Coveo.$('.dropdown-list-item-checkbox').click(function(e){
-        self.resetSearch();
-        var active = this.checked;
-        self.queryStateChanged(e.target.value, active);
-        self.queryController.deferExecuteQuery();
-    });
+DropdownListFacet.prototype.handleClearFiltersClick = function(e){
+    this.clearFilters();
+    return false;
+};
+
+DropdownListFacet.prototype.handleLabelClick = function(e){
+    if (Coveo.$('.dropdown-list-items').css('display') == 'block'){
+        Coveo.$('.dropdown-list-items').css("display", "none");
+        this.expanded = false;
+    } else {
+        Coveo.$('.dropdown-list-items').css("display", "block");
+        this.expanded = true;
+    }
+};
+
+DropdownListFacet.prototype.handleCheckboxClick = function(e){
+    this.resetSearch();
+    var active = e.target.checked;
+    this.queryStateChanged(e.target.value, active);
+    this.queryController.deferExecuteQuery();
 };
 
 DropdownListFacet.prototype.queryStateChanged = function(field, active){
@@ -162,41 +156,24 @@ DropdownListFacet.prototype.queryStateChanged = function(field, active){
 };
 
 DropdownListFacet.prototype.handleSearchInput = function(e){
-    var self = this;
     var matches = [];
-    this.currentSearch = e;
+    this.currentSearch = e.target.value;
 
-    var groupByMatch = this.groupByResults.find(function(e){
-        return '@' + e.Field === self.options.field;
-    }, self);
+    matches = this.groupByResults.filter(function(element){
+        return element.Value.toUpperCase().indexOf(e.target.value.toUpperCase()) >= 0;
+    })
 
-    if (groupByMatch){
-        groupByMatch.values.forEach(function(element){
-            if (element.Value.toUpperCase().indexOf(e.toUpperCase()) >= 0){
-                //element.field = self.options.field;
-                matches.push(element);
-            }
-        });
-    }
-
-    groupByMatch.values = matches;
-    this.groupByResults = [groupByMatch];
-
-    this.buildComponent(this.groupByResults);
+    this.buildComponent(matches, true);
 };
 
 DropdownListFacet.prototype.clearFilters = function(){
-    this.$element.find('.dropdown-list-item-checkbox').each(function(i, element){
-        if (Coveo.$(element).prop('checked')){
-            Coveo.$(element).trigger('click');
-        }
-    });
+    this.queryStateModel.set(this.stateName, []);
+    this.queryController.deferExecuteQuery();
 };
 
 DropdownListFacet.prototype.resetSearch = function(){
     this.currentSearch = "";
     this.expanded = false;
-    this.searching = false;
 };
 
 Coveo.CoveoJQuery.registerAutoCreateComponent(DropdownListFacet);

@@ -15,28 +15,23 @@ CheckboxListFacet.options = {
 
 CheckboxListFacet.prototype.buildComponent = function(groupByResults){
     this.$element.find(this.wrapperClass).unbind().remove();
+    
+    var queryState = this.queryStateModel.get(this.stateName);
 
-    var groupByMatch = groupByResults.find(function(e){
-        return '@' + e.Field === this.options.field;
+    groupByResults.forEach(function(element){
+        var name = element.Value;
+
+        var checkboxWrapper = Coveo.$('<div />', {class: "list-checkbox-wrapper"});
+        Coveo.$('<input />', {id : "list-checkbox-" + name, "class": "list-checkbox", "type": "checkbox", "value": name}).appendTo(checkboxWrapper);
+        Coveo.$('<p />', {"text": name}).appendTo(checkboxWrapper);
+
+        if (queryState.indexOf(name) >= 0){
+            checkboxWrapper.find('#list-checkbox-' + name).prop('checked', true);
+        }            
+
+        checkboxWrapper.appendTo(this.$element);
     }, this);
-
-    if (groupByMatch){
-        var queryState = this.queryStateModel.get(this.stateName);
-
-        groupByMatch.values.forEach(function(element){
-            var name = element.Value;
-
-            var checkboxWrapper = Coveo.$('<div />', {class: "list-checkbox-wrapper"});
-            Coveo.$('<input />', {id : "list-checkbox-" + name, "class": "list-checkbox", "type": "checkbox", "value": name}).appendTo(checkboxWrapper);
-            Coveo.$('<p />', {"text": name}).appendTo(checkboxWrapper);
-
-            if (queryState.indexOf(name) >= 0){
-                checkboxWrapper.find('#list-checkbox-' + name).prop('checked', true);
-            }            
-
-            checkboxWrapper.appendTo(this.$element);
-        }, this);
-    }
+    
 
     this.$element.find('.list-checkbox').click(this.handleClick.bind(this));
 };
