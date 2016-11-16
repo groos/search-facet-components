@@ -61,6 +61,7 @@ DropdownListFacet.prototype.buildListWrappers = function(){
     var listLabelDiv = Coveo.$('<div />', {"class" : "dropdown-list-label", "css" : {"border" : "thin solid grey"}});
     Coveo.$('<span />', {"text" : "Select " + this.options.field}).appendTo(listLabelDiv);
     listLabelDiv.appendTo(listWrapper);
+    listWrapper.appendTo(this.$element);
 
     var display = this.expanded ? "block" : "none";
     var dropdownWrapper = Coveo.$('<div />', {"class" : "dropdown-list-items", "css" : {"display" : display}}).appendTo(listWrapper);
@@ -75,8 +76,6 @@ DropdownListFacet.prototype.buildListWrappers = function(){
     searchInput.val(this.currentSearch);
     searchInput.keyup(this.handleSearchInput.bind(this));
     searchInput.appendTo(dropdownWrapper);
-
-    listWrapper.appendTo(this.$element);
 
     Coveo.$('.dropdown-list-label').click(this.handleLabelClick.bind(this));
 };
