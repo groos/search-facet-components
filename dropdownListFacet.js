@@ -9,6 +9,7 @@ function DropdownListFacet(element, options, bindings){
     this.expanded = false;
     this.wrapperClass = '.dropdown-list-wrapper';
     this.operator = "==";
+    this.activeFilters = 0;
 };
 
 DropdownListFacet.ID = "DropdownListFacet";
@@ -18,6 +19,7 @@ DropdownListFacet.options = {
 
 DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearched){
     var self = this;
+    this.activeFilters = 0;
 
     if (!userSearched){
         this.groupByResults = groupByResults;
@@ -26,7 +28,7 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
     // unbind events and remove old DropdownListFacet
     this.$element.find(this.wrapperClass).unbind().remove();
 
-    var activeFilters = 0;
+    
 
     // Create the dropdown
     var listWrapper = Coveo.$('<div />', {"class" : "dropdown-list-wrapper", "css" : {"border" : "thin solid black"}});
@@ -67,7 +69,7 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
 
         if (queryState.indexOf(name) >= 0){
             listItemCheckbox.prop('checked', true);
-            activeFilters++;
+            this.activeFilters++;
         }
 
         var listItemLabel = Coveo.$('<span />', {"class": "dropdown-list-item-label", 
@@ -83,17 +85,17 @@ DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearch
         listItemLabel.appendTo(listItem);
         listItemCount.appendTo(listItem);
         listItem.appendTo(dropdownWrapper);
-    });
+    }, this);
     
 
     // active filters label
-    activeFilters = activeFilters ? activeFilters : "all";
+    var activeFiltersText = this.activeFilters ? this.activeFilters : "all";
     Coveo.$('<span />', {"class" : "dropdown-filter-count-label", 
-                        "text": "(" + activeFilters + ")",
+                        "text": "(" + activeFiltersText + ")",
                         "css" : {"padding-left" : "5px"}}).appendTo(listLabelDiv);
 
     // add 'X' to clear filters if any are active
-    if (activeFilters > 0){
+    if (this.activeFilters > 0){
         var clearFilters = Coveo.$('<span />', {"text" : "X", "css" : {"margin-left" : "10px", "background-color" : "red", "cursor" : "default"}});
 
         // bind click event
