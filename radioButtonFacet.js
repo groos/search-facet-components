@@ -13,8 +13,6 @@ RadioButtonFacet.options = {
 };
 
 RadioButtonFacet.prototype.buildComponent = function(groupByResults) {
-    var self = this;
-
     this.$element.find(this.wrapperClass).unbind().remove();
 
     groupByResults.forEach(function(element){
@@ -24,8 +22,8 @@ RadioButtonFacet.prototype.buildComponent = function(groupByResults) {
         Coveo.$('<input />', {"id" : "radio-button-" + name,"class" : "radio-button", "type" : "radio", "value" : name}).appendTo(radioButtonWrapper);
         Coveo.$('<p />', {"text" : name}).appendTo(radioButtonWrapper);
         
-        radioButtonWrapper.appendTo(self.$element);
-    }, self);  
+        radioButtonWrapper.appendTo(this.$element);
+    }, this);  
     
 
     var genderFilter = this.queryStateModel.get(this.stateName);

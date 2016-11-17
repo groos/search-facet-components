@@ -31,7 +31,6 @@ CheckboxListFacet.prototype.buildComponent = function(groupByResults){
 
         checkboxWrapper.appendTo(this.$element);
     }, this);
-    
 
     this.$element.find('.list-checkbox').click(this.handleClick.bind(this));
 };
