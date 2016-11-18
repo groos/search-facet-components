@@ -2,7 +2,7 @@ __extends(RadioButtonFacet, FacetBase);
 function RadioButtonFacet(element, options, bindings){
     FacetBase.call(this, element, options, bindings, RadioButtonFacet.ID);
     this.options = Coveo.ComponentOptions.initComponentOptions(element, RadioButtonFacet, options);
-    this.wrapperClass = '.radio-button-wrapper';
+    this.wrapperClass = 'radio-button-wrapper';
     this.$element = Coveo.$(element);
     this.operator = "==";
 };
@@ -13,7 +13,7 @@ RadioButtonFacet.options = {
 };
 
 RadioButtonFacet.prototype.buildComponent = function(groupByResults) {
-    this.$element.find(this.wrapperClass).unbind().remove();
+    this.$element.find('.' + this.wrapperClass).unbind().remove();
 
     groupByResults.forEach(function(element){
         var name = element.Value;
