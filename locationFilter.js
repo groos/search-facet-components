@@ -3,9 +3,8 @@ function LocationFilter(element, options, bindings){
     _super.call(this, element, LocationFilter.ID, bindings);
     this.options = Coveo.ComponentOptions.initComponentOptions(element, LocationFilter, options);
 
-    this.stateName = Coveo.QueryStateModel.getFacetId(this.options.field);
-
-    this.queryStateModel.registerNewAttribute(this.stateName, []);
+    this.sortField = "@" + this.options.field;
+    this.sortDirection = this.options.sortDirection ? this.options.sortDirection : "ascending";
 
     this.wrapperClass = 'location-filter-wrapper';
     this.$element = Coveo.$(element);
@@ -33,13 +32,14 @@ function LocationFilter(element, options, bindings){
 LocationFilter.ID = 'LocationFilter';
 LocationFilter.options = {
     field: Coveo.ComponentOptions.buildStringOption(),
+    latitude: Coveo.ComponentOptions.buildStringOption(),
+    longitude: Coveo.ComponentOptions.buildStringOption(),
     title: Coveo.ComponentOptions.buildStringOption()
 }
 
 LocationFilter.prototype.buildQueryFunction = function(){
     if (this.latitude && this.longitude){
-        // return {"function":"dist(@latitude, @longitude, " + this.latitude + ", " + this.longitude + ")", "fieldName":"distance"};
-        return {"function":"dist(@flatitude22573, @flongitude22573, " + this.latitude + ", " + this.longitude + ")", "fieldName":"distance"};
+        return {"function":"dist(" + this.options.latitude + ", " + this.options.longitude + ", " + this.latitude + ", " + this.longitude + ")", "fieldName": this.sortField};
     }
 };
 
@@ -47,17 +47,16 @@ LocationFilter.prototype.handleBuildingQuery = function(e, data) {
     var queryFunction = this.buildQueryFunction();
     if (queryFunction){
         data.queryBuilder.queryFunctions.push(queryFunction);
-        data.queryBuilder.sortCriteria = "@distance ascending";
+        data.queryBuilder.sortCriteria = this.sortField + " " + this.sortDirection;
     }
 };
 
 LocationFilter.prototype.handleDoneBuildingQuery = function(e, args) {
-    // now that the query is built, add the group-by request
-
+    
 };
 
 LocationFilter.prototype.handleQuerySuccess = function(e, data) {
-    var x = 1;
+    
 };
 
 LocationFilter.prototype.locationPicked = function(){
@@ -65,7 +64,7 @@ LocationFilter.prototype.locationPicked = function(){
     this.latitude = place.geometry.location.lat();
     this.longitude = place.geometry.location.lng();
 
-    this.queryStateModel.set(this.stateName, [true]);
+    this.queryController.deferExecuteQuery();
 };
 
 Coveo.CoveoJQuery.registerAutoCreateComponent(LocationFilter);
