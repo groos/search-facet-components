@@ -7,7 +7,7 @@ function ClearAllFilters(element, options, bindings){
     this.wrapperClass = 'clear-all-filters';
 
     // build the clear button one time in the constructor
-    var wrapper = Coveo.$('<div />', {"class" : this.wrapperClass, "css" : {"width" : "150px"}})
+    var wrapper = Coveo.$('<div />', {"class" : this.wrapperClass, "css" : {"width" : "150px", "text-align" : "center", "cursor" : "pointer"}})
     Coveo.$('<p />', {"class" : "clear-filters-label", "text" : "Clear All Filters!", "css" : {"background-color" : "red"}}).appendTo(wrapper);
     wrapper.appendTo(this.$element);
 

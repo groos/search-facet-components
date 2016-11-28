@@ -18,7 +18,7 @@ function LocationFilter(element, options, bindings){
 /*
 
     To Add:
-        - Add breadcrumb support?
+        - breadcrumb?
 
 */
 
@@ -43,6 +43,7 @@ LocationFilter.prototype.buildComponent = function() {
 
     var clearLocationWrapper = Coveo.$('<div />', {"class" : "clear-location-wrapper",
                                 "css" : {"background-color" : "red", 
+                                "cursor" : "pointer",
                                "display" : "inline-block",
                                "text-align" : "center",
                                "margin-left" : "10px",
@@ -61,13 +62,14 @@ LocationFilter.prototype.buildComponent = function() {
     // Google Autocomplete bindings
     this.autocomplete = new google.maps.places.Autocomplete((this.$element.find("#location-filter-input").get(0)),
                                                             {types: ['geocode']});          
-    this.autocomplete.addListener('place_changed', this.locationPicked.bind(this)); 
+    this.autocomplete.addListener('place_changed', this.setLocation.bind(this)); 
 };
 
 LocationFilter.prototype.clearLocationFilter = function(){
+    // havent found a cleaner way to clear out the google places object,
     this.$element.find('.' + this.wrapperClass).unbind().remove();
     this.buildComponent();
-    this.locationPicked();
+    this.setLocation();
 };
 
 LocationFilter.prototype.buildQueryFunction = function(){
@@ -84,7 +86,7 @@ LocationFilter.prototype.handleBuildingQuery = function(e, data) {
     }
 };
 
-LocationFilter.prototype.locationPicked = function(){
+LocationFilter.prototype.setLocation = function(){
     var place = this.autocomplete.getPlace();
 
     if (place){
