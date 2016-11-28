@@ -25,6 +25,7 @@ function LocationFilter(element, options, bindings){
 LocationFilter.ID = 'LocationFilter';
 LocationFilter.options = {
     field: Coveo.ComponentOptions.buildStringOption(),
+    sortDirection: Coveo.ComponentOptions.buildStringOption(),
     latitude: Coveo.ComponentOptions.buildStringOption(),
     longitude: Coveo.ComponentOptions.buildStringOption(),
     title: Coveo.ComponentOptions.buildStringOption()
