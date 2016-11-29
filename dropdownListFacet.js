@@ -16,7 +16,8 @@ function DropdownListFacet(element, options, bindings){
 
 DropdownListFacet.ID = "DropdownListFacet";
 DropdownListFacet.options = {
-    title: Coveo.ComponentOptions.buildStringOption()
+    title: Coveo.ComponentOptions.buildStringOption(),
+    featured: Coveo.ComponentOptions.buildListOption()
 };
 
 DropdownListFacet.prototype.buildComponent = function(groupByResults, userSearched){
@@ -84,7 +85,10 @@ DropdownListFacet.prototype.buildDropdownListElements = function(groupByResults)
     var dropdownWrapper = this.$element.find(this.listItemsWrapperClass);
     var queryState = this.queryStateModel.get(this.stateName);
 
-    groupByResults.forEach(function(element){
+    // process groupByResults to put featured items at top
+    var resultsWithFeatures = this.applyListFeaturing(groupByResults);
+
+    resultsWithFeatures.forEach(function(element){
         var name = element.Value;
         var listItem = Coveo.$('<div />', {"id" : "dropdown-list-item-" + name,
                                             "class" : "dropdown-list-item",
@@ -117,6 +121,36 @@ DropdownListFacet.prototype.buildDropdownListElements = function(groupByResults)
     }, this);
 
     Coveo.$('.dropdown-list-item-checkbox').click(this.handleCheckboxClick.bind(this));
+};
+
+DropdownListFacet.prototype.applyListFeaturing = function(groupByResults){
+    if (!this.options.featured){
+        return groupByResults;
+    }
+
+    var results = [];
+    var notFeaturedItems = [];
+
+    // move featured items to top. maintains ordering of featured items list 
+    this.options.featured.forEach(function(featured){
+        for (let element of groupByResults){
+            if (results.includes(element)){
+                continue;
+            }
+
+            if (featured == element.value.toLowerCase()){
+                results.push(element);
+            }
+        }
+    }, this);
+
+    groupByResults.forEach(function(element){
+        if (!results.includes(element)){
+            results.push(element)
+        }
+    }, this);
+
+    return results;
 };
 
 DropdownListFacet.prototype.buildActiveFiltersFeatures = function(){
