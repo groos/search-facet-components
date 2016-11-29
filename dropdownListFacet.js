@@ -138,12 +138,13 @@ DropdownListFacet.prototype.applyListFeaturing = function(groupByResults){
                 continue;
             }
 
-            if (featured == element.value.toLowerCase()){
+            if (featured.toLowerCase() == element.value.toLowerCase()){
                 results.push(element);
             }
         }
     }, this);
 
+    // add any remaining non-featured items to the results
     groupByResults.forEach(function(element){
         if (!results.includes(element)){
             results.push(element)
