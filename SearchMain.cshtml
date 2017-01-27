@@ -1,0 +1,51 @@
+@inherits System.Web.Mvc.WebViewPage<Coveo.UI.Mvc.Models.SearchModel>
+
+<!--@Model.ToCoveoFieldName("test content")-->
+
+<script type="text/javascript">
+	Coveo.$(function() {
+		CoveoForSitecore.componentsOptions = @Html.Raw(Model.GetJavaScriptInitializationOptions());
+	});
+</script>
+
+<div id="search" class="CoveoSearchInterface" data-enable-history="true">
+<div class="CoveoBreadcrumb"></div>
+
+  <div class="CoveoSearchbox" ></div>
+
+  <h3>Clear All Filters</h3>
+  <div class="CoveoClearAllFilters" data-title="Clear All Filters"> </div>
+
+  <h3>Filter by Location</h3>
+  <div class="CoveoLocationFilter" data-field='distance' data-longitude='@Model.ToCoveoFieldName("longitude")' data-latitude='@Model.ToCoveoFieldName("latitude")' data-title='Filter By Location'></div>
+
+  <h3>Dropdown Facet</h3>
+  <div class="CoveoDropdownListFacet" data-field='@Model.ToCoveoFieldName("sportsdelim")' data-title='Sports' data-featured=''></div>
+
+  <h3>Check for "Text" Field</h3>
+  <div class="CoveoCheckboxFacet" data-field='@Model.ToCoveoFieldName("text")' data-title='Checkbox'></div>
+
+  <h3>Gender</h3>
+  <div class="CoveoRadioButtonFacet" data-field='@Model.ToCoveoFieldName("gender")' data-title='Gender'></div>
+
+  <h3>Sport</h3>
+  <!--<div class="CoveoCheckboxListFacet" data-field='@Model.ToCoveoFieldName("sportsdelim")' data-title='Sports'></div>-->
+  <div class="CoveoQuerySummary"></div>
+  <div class="CoveoResultList">
+    <script class="result-template" type="text/underscore" id='MyDefaultTemplate'>
+      <div>
+        <a class='CoveoResultLink'>{{= raw.@Model.ToCoveoFieldName("Title", false) }}</a>
+        {{= raw.@Model.ToCoveoFieldName("Test Content", false) }}
+      </div>
+    </script>
+  </div>
+
+  <!--<div class="CoveoFacet" data-title="My Title" data-field="@@fgender22573"></div>-->
+
+</div>
+
+<script type="text/javascript">
+	Coveo.$(function() {
+		Coveo.$('#search').coveoForSitecore('init', CoveoForSitecore.componentsOptions);
+	});
+</script>
